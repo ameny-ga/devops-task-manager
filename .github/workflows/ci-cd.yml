@@ -1,0 +1,186 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/task-manager-api
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  # Job 1: Code Quality and Security
+  code-quality:
+    name: Code Quality & SAST
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install bandit safety flake8
+      
+      - name: Run Flake8 (Linting)
+        run: |
+          flake8 app.py --max-line-length=120 --count --statistics
+        continue-on-error: true
+      
+      - name: Run Bandit (SAST)
+        run: |
+          bandit -r app.py -f json -o bandit-report.json
+          bandit -r app.py
+        continue-on-error: true
+      
+      - name: Safety Check (Dependency Scan)
+        run: |
+          safety check --json > safety-report.json || true
+          safety check || true
+        continue-on-error: true
+      
+      - name: Upload SAST Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: sast-reports
+          path: |
+            bandit-report.json
+            safety-report.json
+
+  # Job 2: Unit Tests
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: code-quality
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run tests with coverage
+        run: |
+          pytest test_app.py -v --cov=app --cov-report=xml --cov-report=html
+      
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: htmlcov/
+
+  # Job 3: Build and Push Docker Image
+  build:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
+            ${{ env.DOCKER_IMAGE }}:latest
+          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max
+
+  # Job 4: DAST (Dynamic Application Security Testing)
+  dast:
+    name: DAST Scan
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run container for testing
+        run: |
+          docker run -d -p 5000:5000 --name test-api ${{ env.DOCKER_IMAGE }}:latest
+          sleep 10
+      
+      - name: Wait for API to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -f http://localhost:5000/health; then
+              echo "API is ready"
+              break
+            fi
+            echo "Waiting for API... ($i/30)"
+            sleep 2
+          done
+      
+      - name: Run OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.10.0
+        with:
+          target: 'http://localhost:5000'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a'
+        continue-on-error: true
+      
+      - name: Stop container
+        if: always()
+        run: |
+          docker stop test-api || true
+          docker rm test-api || true
+      
+      - name: Upload DAST Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dast-report
+          path: report_html.html
+
+  # Job 5: Deploy (for main branch only)
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: dast
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Deploy notification
+        run: |
+          echo "Deploying version ${{ env.IMAGE_TAG }}"
+          echo "Image: ${{ env.DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}"
+      
+      # Add your deployment steps here (Kubernetes, Cloud, etc.)
+      - name: Update Kubernetes deployment
+        run: |
+          echo "Update Kubernetes manifests with new image tag"
+          echo "kubectl set image deployment/task-manager-api api=${{ env.DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}"

@@ -1,0 +1,11 @@
+# Prometheus configuration for scraping metrics
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Scrape metrics from Task Manager API
+  - job_name: 'task-manager-api'
+    static_configs:
+      - targets: ['api:5000']
+    metrics_path: '/metrics'

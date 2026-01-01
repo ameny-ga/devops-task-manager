@@ -1,0 +1,21 @@
+# Flask framework for REST API
+Flask==3.0.0
+
+# Prometheus metrics for observability
+prometheus-flask-exporter==0.23.0
+
+# OpenTelemetry for distributed tracing
+opentelemetry-api==1.22.0
+opentelemetry-sdk==1.22.0
+opentelemetry-instrumentation-flask==0.43b0
+
+# Testing framework
+pytest==7.4.3
+pytest-cov==4.1.0
+
+# Security and code quality
+bandit==1.7.6
+safety==2.3.5
+
+# WSGI server for production
+gunicorn==21.2.0

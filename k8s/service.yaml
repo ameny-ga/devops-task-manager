@@ -1,0 +1,17 @@
+# Kubernetes Service for Task Manager API
+apiVersion: v1
+kind: Service
+metadata:
+  name: task-manager-service
+  labels:
+    app: task-manager
+spec:
+  type: LoadBalancer
+  selector:
+    app: task-manager
+  ports:
+  - port: 80
+    targetPort: 5000
+    protocol: TCP
+    name: http
+  sessionAffinity: None
