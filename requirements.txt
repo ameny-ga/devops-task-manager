@@ -1,5 +1,5 @@
 # Flask framework for REST API
-Flask==3.0.0
+Flask==3.0.3
 
 # Prometheus metrics for observability
 prometheus-flask-exporter==0.23.0
@@ -15,7 +15,7 @@ pytest-cov==4.1.0
 
 # Security and code quality
 bandit==1.7.6
-safety==2.3.5
+# safety==2.3.5  # Removed due to compilation issues on Windows
 
 # WSGI server for production
 gunicorn==21.2.0
