@@ -1,7 +1,7 @@
 # Task Manager API - DevOps Project
 
-[![CI/CD Pipeline](https://github.com/yourusername/devops-task-manager/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/yourusername/devops-task-manager/actions)
-[![Docker Image](https://img.shields.io/docker/v/yourusername/task-manager-api?label=docker)](https://hub.docker.com/r/yourusername/task-manager-api)
+[![CI/CD Pipeline](https://github.com/ameny-ga/devops-task-manager/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/ameny-ga/devops-task-manager/actions)
+[![Docker Image](https://img.shields.io/docker/v/ameeny/task-manager-api?label=docker)](https://hub.docker.com/r/ameeny/task-manager-api)
 [![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
