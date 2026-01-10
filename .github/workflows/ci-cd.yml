@@ -175,6 +175,7 @@ jobs:
         run: |
           echo "Deploying version ${{ env.IMAGE_TAG }}"
           echo "Image: ${{ env.DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}"
+          echo "Docker Hub: https://hub.docker.com/r/${{ secrets.DOCKER_USERNAME }}/task-manager-api"
       
       # Add your deployment steps here (Kubernetes, Cloud, etc.)
       - name: Update Kubernetes deployment
