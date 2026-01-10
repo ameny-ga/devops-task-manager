@@ -3,9 +3,11 @@
 ## 📋 Informations du projet
 
 - **Nom du projet:** Task Manager REST API
-- **Étudiant:** [Votre nom]
+- **Étudiant:** Amani
 - **Date:** Janvier 2026
-- **Durée du projet:** [X semaines]
+- **Durée du projet:** 2 semaines
+- **Repository GitHub:** https://github.com/ameny-ga/devops-task-manager
+- **Image Docker Hub:** https://hub.docker.com/r/ameeny/task-manager-api
 
 ---
 

@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: yourusername/task-manager-api:latest
+        image: ameeny/task-manager-api:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
