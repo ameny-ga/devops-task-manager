@@ -8,8 +8,8 @@ WORKDIR /app
 # Copy requirements file
 COPY requirements.txt .
 
-# Install dependencies
-RUN pip install --no-cache-dir --user -r requirements.txt
+# Install dependencies in a specific directory
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
 # Stage 2: Production stage
 FROM python:3.11-slim
@@ -18,7 +18,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Copy dependencies from builder stage
-COPY --from=builder /root/.local /root/.local
+COPY --from=builder /install /usr/local
 
 # Copy application code
 COPY app.py .
@@ -29,9 +29,6 @@ RUN useradd -m -u 1000 appuser && \
 
 # Switch to non-root user
 USER appuser
-
-# Update PATH to include user site-packages
-ENV PATH=/root/.local/bin:$PATH
 
 # Expose port 5000
 EXPOSE 5000
