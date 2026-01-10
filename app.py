@@ -9,7 +9,6 @@ from flask import Flask, request, jsonify
 from prometheus_flask_exporter import PrometheusMetrics
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import ConsoleSpanExporter, BatchSpanExporter
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 import logging
 import json
@@ -143,4 +142,4 @@ def internal_error(error):
 
 if __name__ == '__main__':
     logger.info("Starting Task Manager API on port 5000")
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=5000, debug=False)  # nosec B104

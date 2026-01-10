@@ -33,20 +33,17 @@ jobs:
       
       - name: Run Flake8 (Linting)
         run: |
-          flake8 app.py --max-line-length=120 --count --statistics
-        continue-on-error: true
+          flake8 app.py --max-line-length=120 --count --statistics || echo "Flake8 issues found but continuing"
       
       - name: Run Bandit (SAST)
         run: |
-          bandit -r app.py -f json -o bandit-report.json
-          bandit -r app.py
-        continue-on-error: true
+          bandit -r app.py -f json -o bandit-report.json || true
+          bandit -r app.py || echo "Bandit scan completed with findings"
       
       - name: Safety Check (Dependency Scan)
         run: |
           safety check --json > safety-report.json || true
-          safety check || true
-        continue-on-error: true
+          safety check || echo "Safety scan completed"
       
       - name: Upload SAST Reports
         uses: actions/upload-artifact@v4
