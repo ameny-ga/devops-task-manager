@@ -60,24 +60,50 @@ API REST simple pour la gestion de tâches avec observabilité complète, sécur
 ### Prérequis
 
 - Python 3.11+
-- Docker & Docker Compose
-- Kubernetes (minikube/kind) - optionnel
+- Docker Desktop
+- Kubernetes (Minikube) 
+- kubectl
 - Git
 
-### Installation locale
+### 🎯 Démarrage rapide (Kubernetes)
+
+```bash
+# 1. Démarrer Minikube
+minikube start
+
+# 2. Déployer l'application
+kubectl apply -f k8s/
+
+# 3. Vérifier que tout tourne
+kubectl get pods
+
+# 4. Accéder à l'API
+kubectl port-forward service/task-manager-service 8081:80
+```
+
+**✅ L'API est maintenant disponible sur http://localhost:8081**
+
+### Installation locale (développement)
 
 1. **Cloner le repository**
 ```bash
-git clone https://github.com/yourusername/devops-task-manager.git
+git clone https://github.com/ameny-ga/devops-task-manager.git
 cd devops-task-manager
 ```
 
-2. **Installer les dépendances**
+2. **Créer l'environnement virtuel**
+```bash
+python -m venv venv
+.\venv\Scripts\Activate.ps1  # Windows
+source venv/bin/activate     # Linux/Mac
+```
+
+3. **Installer les dépendances**
 ```bash
 pip install -r requirements.txt
 ```
 
-3. **Lancer l'application**
+4. **Lancer l'application**
 ```bash
 python app.py
 ```
@@ -86,32 +112,92 @@ L'API sera disponible sur `http://localhost:5000`
 
 ### 🐳 Utilisation avec Docker
 
-#### Build et run manuel
+#### Build de l'image
 ```bash
 # Construire l'image
 docker build -t task-manager-api .
 
-# Lancer le container
-docker run -p 5000:5000 task-manager-api
+# Charger dans Minikube (pour Kubernetes)
+minikube image load task-manager-api:latest
 ```
 
-#### Avec Docker Compose (recommandé)
+### ☸️ Déploiement Kubernetes (Recommandé)
+
+**Architecture actuelle : Kubernetes avec Minikube**
+
 ```bash
-# Lancer tous les services (API + Prometheus + Grafana)
-docker-compose up -d
+# Démarrer Minikube
+minikube start
 
-# Voir les logs
-docker-compose logs -f
+# Déployer tous les services
+kubectl apply -f k8s/
 
-# Arrêter les services
-docker-compose down
+# Vérifier le déploiement
+kubectl get all
 ```
 
-**Services disponibles:**
-- API: http://localhost:5000
-- Prometheus: http://localhost:9090
-- Grafana: http://localhost:3000 (admin/admin)
-- Métriques: http://localhost:5000/metrics
+**Services déployés:**
+- 🚀 **3 replicas** de l'API (haute disponibilité)
+- 📊 **Prometheus** pour les métriques
+- 📈 **Grafana** pour la visualisation
+- ⚖️ **HPA** pour l'autoscaling (2-10 pods)
+
+#### Accéder aux services (Port-Forward)
+
+```powershell
+# API (Terminal 1)
+kubectl port-forward service/task-manager-service 8081:80
+# Accès: http://localhost:8081
+
+# Prometheus (Terminal 2)  
+kubectl port-forward service/prometheus-service 9091:9090
+# Accès: http://localhost:9091
+
+# Grafana (Terminal 3)
+kubectl port-forward service/grafana-service 3001:3000
+# Accès: http://localhost:3001 (admin/admin)
+```
+
+**Services disponibles via Kubernetes:**
+| Service | Port Local | URL | Credentials |
+|---------|-----------|-----|-------------|
+| **API** | 8081 | http://localhost:8081 | - |
+| **Prometheus** | 9091 | http://localhost:9091 | - |
+| **Grafana** | 3001 | http://localhost:3001 | admin/admin |
+| **Métriques API** | 8081 | http://localhost:8081/metrics | - |
+
+#### Commandes utiles Kubernetes
+
+```bash
+# Voir les pods
+kubectl get pods
+
+# Logs de l'API
+kubectl logs -f deployment/task-manager-api
+
+# Scaler manuellement
+kubectl scale deployment task-manager-api --replicas=5
+
+# Redémarrer les pods
+kubectl rollout restart deployment/task-manager-api
+
+# Supprimer tous les déploiements
+kubectl delete -f k8s/
+```
+
+### 🧪 Tester l'API rapidement
+
+```powershell
+# Health check
+Invoke-RestMethod http://localhost:8081/health
+
+# Créer une tâche
+$body = @{title="Test"; description="Ma tâche"} | ConvertTo-Json
+Invoke-RestMethod -Uri http://localhost:8081/api/tasks -Method Post -Body $body -ContentType "application/json"
+
+# Lister les tâches
+Invoke-RestMethod http://localhost:8081/api/tasks
+```
 
 ## 📡 Endpoints API
 
