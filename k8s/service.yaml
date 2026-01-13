@@ -6,7 +6,7 @@ metadata:
   labels:
     app: task-manager
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: task-manager
   ports:
