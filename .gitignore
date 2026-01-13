@@ -54,3 +54,6 @@ report_html.html
 
 # Kubernetes
 *.kubeconfig
+# Documentation locale (sauf README.md)
+*.md
+!README.md
