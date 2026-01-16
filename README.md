@@ -543,5 +543,14 @@ Ce projet fait partie du cours de DevOps et démontre:
 **Date:** Janvier 2026  
 **Cours:** DevOps Project
 
- < ! - -   K u b e r n e t e s   d e p l o y m e n t   w i t h   H P A   - - >  
+ < ! - -   K u b e r n e t e s   d e p l o y m e n t   w i t h   H P A   - - > 
+ 
+
+ < ! - -   C I / C D   p i p e l i n e   w i t h   G i t H u b   A c t i o n s   - - > 
+ 
+
+ < ! - -   D o c k e r   c o n f i g u r a t i o n   c o m p l e t e   - - > 
+ 
+ < ! - -   U n i t   t e s t s   a n d   t e s t   a u t o m a t i o n   - - > 
+ 
  
